@@ -26,18 +26,13 @@ class HomeFragment : Fragment() {
     private val articleList = mutableListOf<Article>()
     private val listener = object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-            Log.e("lilili", "childAdd: ", )
-
             val article = snapshot.getValue(Article::class.java) ?: return
             articleList.add(article)
             articleAdapter.submitList(articleList)
             articleAdapter.notifyItemChanged(articleList.lastIndex)
         }
 
-        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-            Log.e("lilili", "childChange: ", )
-
-        }
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
 
         override fun onChildRemoved(snapshot: DataSnapshot) {}
 
@@ -91,7 +86,6 @@ class HomeFragment : Fragment() {
     }
 
     override fun onResume() {
-        Log.e("lilili", "onResume: ", )
         super.onResume()
         articleList.clear()
     }

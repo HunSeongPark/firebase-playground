@@ -11,12 +11,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -83,15 +84,56 @@ class AddFragment : Fragment() {
         }
 
         addBtn.setOnClickListener {
+            progressBar.isVisible = true
             val title = titleEt.text.toString()
-            val price = priceEt.text.toString() + "원"
+            val price = "${priceEt.text.toString().toInt()}원"
             val sellerId = auth.currentUser?.uid.orEmpty()
 
-            val article = Article(sellerId, title, System.currentTimeMillis(), price, "")
-            articleDB.push().setValue(article)
-
-            findNavController().navigateUp()
+            if (selectedUri != null) {
+                uploadPhoto(successHandler = { imageUrl ->
+                    uploadArticle(sellerId, title, price, imageUrl)
+                }, errorHandler = {
+                    Toast.makeText(requireContext(), "사진 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    progressBar.isGone = true
+                })
+            } else {
+                uploadArticle(sellerId, title, price, "")
+            }
         }
+    }
+
+    private fun uploadPhoto(
+        successHandler: (String) -> Unit,
+        errorHandler: () -> Unit,
+    ) {
+        val fileName = "${System.currentTimeMillis()}.png"
+        storage.reference.child("article/photo").child(fileName)
+            .putFile(selectedUri!!)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    storage.reference.child("article/photo").child(fileName)
+                        .downloadUrl
+                        .addOnSuccessListener { uri ->
+                            successHandler(uri.toString())
+                        }.addOnFailureListener {
+                            errorHandler()
+                        }
+                } else {
+                    errorHandler()
+                }
+            }
+    }
+
+    private fun uploadArticle(
+        sellerId: String,
+        title: String,
+        price: String,
+        imageUrl: String,
+    ) {
+        val article = Article(sellerId, title, System.currentTimeMillis(), price, imageUrl)
+        articleDB.push().setValue(article)
+
+        findNavController().navigateUp()
     }
 
     override fun onRequestPermissionsResult(
