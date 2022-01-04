@@ -5,13 +5,45 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.hunseong.recycle.databinding.FragmentHomeBinding
+import com.hunseong.recycle.extension.DBKey.DB_ARTICLES
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
+    private lateinit var articleDB: DatabaseReference
+
+    private val articleList = mutableListOf<Article>()
+    private val listener = object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+            val article = snapshot.getValue(Article::class.java) ?: return
+            articleList.add(article)
+            articleAdapter.submitList(articleList)
+        }
+
+        override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+        override fun onCancelled(error: DatabaseError) {}
+
+    }
 
     private val articleAdapter: ArticleAdapter by lazy {
         ArticleAdapter()
+    }
+
+    private val auth: FirebaseAuth by lazy {
+        Firebase.auth
     }
 
     override fun onCreateView(
@@ -25,18 +57,20 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        articleAdapter.submitList(listOf(
-            Article(sellerId = "0",
-                title = "aaaa",
-                price = "100원",
-                createdAt = System.currentTimeMillis(),
-            imageUrl = ""),
-            Article(sellerId = "1",
-                title = "abba",
-                price = "1200원",
-                createdAt = 100000,
-                imageUrl = ""),
-        ))
+
+        articleDB = Firebase.database.reference.child(DB_ARTICLES)
+
+        articleDB.addChildEventListener(listener)
         binding.recyclerView.adapter = articleAdapter
+    }
+
+    override fun onResume() {
+        super.onResume()
+        articleAdapter.notifyDataSetChanged()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        articleDB.removeEventListener(listener)
     }
 }
