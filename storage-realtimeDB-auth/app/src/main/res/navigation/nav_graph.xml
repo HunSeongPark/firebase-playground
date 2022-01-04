@@ -7,7 +7,18 @@
 
     <fragment android:id="@+id/home_fragment"
         android:name="com.hunseong.recycle.home.HomeFragment"
-        tools:layout="@layout/fragment_home"/>
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/home_to_add"
+            app:destination="@id/add_fragment"
+            />
+
+    </fragment>
+
+    <fragment android:id="@+id/add_fragment"
+        android:name="com.hunseong.recycle.add.AddFragment"
+        tools:layout="@layout/fragment_add"/>
 
     <fragment android:id="@+id/chat_fragment"
         android:name="com.hunseong.recycle.chat.ChatFragment"

@@ -4,4 +4,9 @@
     <string name="chatting">채팅</string>
     <string name="my_info">내 정보</string>
     <string name="recycle">중고 거래</string>
+    <string name="register_item">물품 등록</string>
+    <string name="register">등록하기</string>
+    <string name="title">글 제목</string>
+    <string name="price">가격</string>
+    <string name="register_image">이미지 등록하기</string>
 </resources>
