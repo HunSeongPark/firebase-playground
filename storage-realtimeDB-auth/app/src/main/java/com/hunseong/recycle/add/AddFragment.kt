@@ -15,6 +15,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
@@ -168,7 +169,9 @@ class AddFragment : Fragment() {
         if (requestCode == 2000) {
             val uri = data?.data
             if (uri != null) {
-                binding.photoIv.setImageURI(uri)
+                Glide.with(binding.photoIv)
+                    .load(uri)
+                    .into(binding.photoIv)
                 selectedUri = uri
             } else {
                 Toast.makeText(requireContext(), "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
